@@ -322,7 +322,44 @@ section { padding: 80px 0; }
 .video-placeholder .fa { font-size: 40px; }
 .video-placeholder p { font-size: 14px; font-weight: 600; color: #888; }
 .video-placeholder span { font-size: 12px; color: #555; }
-.video-placeholder video { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+.video-item { border-radius: 16px; overflow: hidden; background: #111; border: 1px solid #1e1e1e; }
+.video-item .gallery-label { padding: 10px 14px; font-size: 13px; color: #888; border-top: 1px solid #1e1e1e; }
+
+/* Video showcase */
+.video-showcase { display: grid; grid-template-columns: 1fr 280px; gap: 20px; align-items: start; }
+.video-main { position: relative; border-radius: 16px; overflow: hidden; background: #000; }
+.video-overlay {
+  position: absolute; bottom: 14px; right: 14px;
+}
+.vid-mute-btn {
+  background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);
+  color: #fff; width: 38px; height: 38px; border-radius: 50%;
+  cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.vid-mute-btn:hover { background: rgba(200,169,110,0.7); }
+.video-thumbs { display: flex; flex-direction: column; gap: 12px; }
+.video-thumb {
+  position: relative; border-radius: 12px; overflow: hidden;
+  border: 2px solid #1e1e1e; cursor: pointer; aspect-ratio: 16/9;
+  transition: border-color .2s;
+}
+.video-thumb.active { border-color: #c8a96e; }
+.video-thumb:hover { border-color: #888; }
+.thumb-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  color: #fff; font-size: 12px; font-weight: 600;
+  padding: 16px 10px 8px;
+}
+.thumb-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.15); }
+.thumb-progress-bar { height: 100%; width: 0%; background: #c8a96e; transition: width .3s linear; }
+
+@media (max-width: 768px) {
+  .video-showcase { grid-template-columns: 1fr; }
+  .video-thumbs { flex-direction: row; }
+  .video-thumb { flex: 1; }
+}
 
 /* ===== GALLERY ===== */
 .gallery { background: #0a0a0a; }
@@ -448,7 +485,8 @@ section { padding: 80px 0; }
   .hero-content h1 { font-size: 48px; }
   .hero-btns { justify-content: center; }
   .hero-stats { justify-content: center; }
-  .hero-image { display: none; }
+  .hero-image { display: block; margin-top: 32px; }
+  .hero-image video { aspect-ratio: 16/9; border-radius: 14px; }
   .reservation-inner { grid-template-columns: 1fr; text-align: center; gap: 32px; }
   .reservation-features { justify-content: center; }
   .reservation-text p { max-width: 100%; }

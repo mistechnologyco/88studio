@@ -77,10 +77,58 @@ document.querySelectorAll('.gallery-item img').forEach(img => {
   img.addEventListener('click', () => openLightbox(img.src));
 });
 
-// Video upload placeholder (for future use)
-function openVideoUpload(n) {
-  alert('Video ' + n + ' için dosya yükleme özelliği yakında eklenecek. Şimdilik videoları doğrudan HTML\'e ekleyebilirsiniz.');
+// Video showcase player
+const videoSrcs = ['1.mp4', '2.mp4', '4.mp4'];
+let currentVidIndex = 0;
+let progressInterval = null;
+
+function switchVideo(index) {
+  const mainVideo = document.getElementById('mainVideo');
+  if (!mainVideo) return;
+
+  // Reset thumbs
+  document.querySelectorAll('.video-thumb').forEach((t, i) => {
+    t.classList.toggle('active', i === index);
+    document.getElementById('prog' + i).style.width = '0%';
+  });
+
+  currentVidIndex = index;
+  mainVideo.src = videoSrcs[index];
+  mainVideo.play();
+  startProgress();
 }
+
+function startProgress() {
+  clearInterval(progressInterval);
+  const mainVideo = document.getElementById('mainVideo');
+  if (!mainVideo) return;
+  progressInterval = setInterval(() => {
+    if (!mainVideo.duration) return;
+    const pct = (mainVideo.currentTime / mainVideo.duration) * 100;
+    document.getElementById('prog' + currentVidIndex).style.width = pct + '%';
+    if (pct >= 99.5) {
+      clearInterval(progressInterval);
+      const next = (currentVidIndex + 1) % videoSrcs.length;
+      switchVideo(next);
+    }
+  }, 200);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const mainVideo = document.getElementById('mainVideo');
+  if (mainVideo) {
+    mainVideo.addEventListener('canplay', () => { mainVideo.play(); startProgress(); }, { once: true });
+  }
+});
+
+function toggleMute() {
+  const v = document.getElementById('mainVideo');
+  if (!v) return;
+  v.muted = !v.muted;
+  document.getElementById('muteIcon').className = v.muted ? 'fa fa-volume-mute' : 'fa fa-volume-up';
+}
+
+
 
 // Animate on scroll
 const observer = new IntersectionObserver((entries) => {
