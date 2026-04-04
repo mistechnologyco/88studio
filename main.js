@@ -21,7 +21,7 @@ function doSearch() {
   if (!q) return;
   const sections = ['#services', '#about', '#gallery', '#reviews', '#contact'];
   const keywords = {
-    '#services': ['hizmet', 'keratin', 'botoks', 'botox', 'mamoplastik', 'kesim', 'renk', 'bakım', 'service', 'услуг', 'кератин'],
+    '#services': ['hizmet', 'keratin', 'botoks', 'botox', 'nanoplastika', 'kesim', 'renk', 'bakım', 'service', 'услуг', 'кератин'],
     '#about': ['hakkında', 'stüdyo', 'about', 'studio', 'о нас'],
     '#gallery': ['galeri', 'fotoğraf', 'gallery', 'photo', 'галерея'],
     '#reviews': ['yorum', 'review', 'отзыв'],
@@ -51,11 +51,20 @@ function sendWA(e) {
   const service = document.getElementById('fservice').value;
   const msg = document.getElementById('fmsg').value;
   const t = translations[currentLang];
-  let text = `Merhaba, 88 Studio Keratin!\n\n`;
-  text += `İsim: ${name}\n`;
-  if (phone) text += `Telefon: ${phone}\n`;
-  if (service) text += `Hizmet: ${service}\n`;
-  if (msg) text += `Mesaj: ${msg}`;
+
+  // Map of label keys for dynamic translation
+  const labels = {
+    name: currentLang === 'tr' ? 'İsim' : (currentLang === 'ru' ? 'Имя' : 'Name'),
+    phone: currentLang === 'tr' ? 'Telefon' : (currentLang === 'ru' ? 'Телефон' : 'Phone'),
+    service: currentLang === 'tr' ? 'Hizmet' : (currentLang === 'ru' ? 'Услуга' : 'Service'),
+    message: currentLang === 'tr' ? 'Mesaj' : (currentLang === 'ru' ? 'Сообщение' : 'Message')
+  };
+
+  let text = `${t['wa_greeting'] || 'Hello!'}\n\n`;
+  text += `${labels.name}: ${name}\n`;
+  if (phone) text += `${labels.phone}: ${phone}\n`;
+  if (service) text += `${labels.service}: ${service}\n`;
+  if (msg) text += `${labels.message}: ${msg}`;
   const encoded = encodeURIComponent(text);
   window.open(`https://wa.me/905317285623?text=${encoded}`, '_blank');
 }
@@ -77,58 +86,36 @@ document.querySelectorAll('.gallery-item img').forEach(img => {
   img.addEventListener('click', () => openLightbox(img.src));
 });
 
-// Video showcase player
-const videoSrcs = ['1.mp4', '2.mp4', '4.mp4'];
-let currentVidIndex = 0;
-let progressInterval = null;
-
-function switchVideo(index) {
-  const mainVideo = document.getElementById('mainVideo');
-  if (!mainVideo) return;
-
-  // Reset thumbs
-  document.querySelectorAll('.video-thumb').forEach((t, i) => {
-    t.classList.toggle('active', i === index);
-    document.getElementById('prog' + i).style.width = '0%';
+// Premium Gallery
+function activateVidCard(el) {
+  document.querySelectorAll('.pg-item').forEach(item => {
+    item.classList.remove('active');
+    const v = item.querySelector('video');
+    if (v) v.pause();
   });
-
-  currentVidIndex = index;
-  mainVideo.src = videoSrcs[index];
-  mainVideo.play();
-  startProgress();
+  el.classList.add('active');
+  const activeVid = el.querySelector('video');
+  if (activeVid) activeVid.play();
 }
 
-function startProgress() {
-  clearInterval(progressInterval);
-  const mainVideo = document.getElementById('mainVideo');
-  if (!mainVideo) return;
-  progressInterval = setInterval(() => {
-    if (!mainVideo.duration) return;
-    const pct = (mainVideo.currentTime / mainVideo.duration) * 100;
-    document.getElementById('prog' + currentVidIndex).style.width = pct + '%';
-    if (pct >= 99.5) {
-      clearInterval(progressInterval);
-      const next = (currentVidIndex + 1) % videoSrcs.length;
-      switchVideo(next);
+
+
+// Video Performance Observer (Play only when visible)
+const videoObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const video = entry.target;
+    if (entry.isIntersecting) {
+      // In hero or if active in gallery, play
+      if (video.closest('.p-slide') || video.closest('.pg-item.active')) {
+        video.play().catch(() => {});
+      }
+    } else {
+      video.pause();
     }
-  }, 200);
-}
+  });
+}, { threshold: 0.1 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const mainVideo = document.getElementById('mainVideo');
-  if (mainVideo) {
-    mainVideo.addEventListener('canplay', () => { mainVideo.play(); startProgress(); }, { once: true });
-  }
-});
-
-function toggleMute() {
-  const v = document.getElementById('mainVideo');
-  if (!v) return;
-  v.muted = !v.muted;
-  document.getElementById('muteIcon').className = v.muted ? 'fa fa-volume-mute' : 'fa fa-volume-up';
-}
-
-
+document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
 
 // Animate on scroll
 const observer = new IntersectionObserver((entries) => {
